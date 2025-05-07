@@ -1,0 +1,31 @@
+---
+# Install Zsh
+- name: Install Zsh
+  apt:
+    name: zsh
+    state: present
+    update_cache: yes
+
+# Install autocomplete (zsh-autosuggestions, zsh-syntax-highlighting)
+- name: Clone zsh-autosuggestions plugin
+  git:
+    repo: https://github.com/zsh-users/zsh-autosuggestions.git
+    dest: ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions
+
+- name: Clone zsh-syntax-highlighting plugin
+  git:
+    repo: https://github.com/zsh-users/zsh-syntax-highlighting.git
+    dest: ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
+
+# Set Zsh as the default shell
+- name: Set Zsh as the default shell
+  shell: chsh -s $(which zsh) "mdils"
+  args:
+    executable: /bin/bash
+
+# Install Oh My Zsh
+- name: Install Oh My Zsh
+  shell: |
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+  args:
+    creates: ~/.oh-my-zsh

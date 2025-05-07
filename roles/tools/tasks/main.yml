@@ -1,0 +1,214 @@
+---
+# Update apt cache
+- name: Update apt cache
+  apt:
+    update_cache: yes
+    force_apt_get: yes
+
+# Install essential build tools and Python development environment
+- name: Install essential build tools and Python development environment
+  apt:
+    name:
+      - build-essential
+      - libssl-dev
+      - libffi-dev
+      - python3-dev
+      - python3-pip
+      - python3-venv
+      - python3.10
+    state: present
+    force_apt_get: yes
+
+# Install development tools
+- name: Install development tools
+  apt:
+    name:
+      - git
+      - git-filter-repo
+      - golang
+      - default-jdk
+      - php-dev
+      - php-pear
+      - php8.3-bcmath
+      - composer
+    state: present
+    force_apt_get: yes
+
+# Install system utilities
+- name: Install system utilities
+  apt:
+    name:
+      - curl
+      - wget
+      - unzip
+      - htop
+      - tmux
+      - ripgrep
+      - jq
+      - xclip
+      - ffmpeg
+      - postgresql-client
+      - software-properties-common
+      - apt-transport-https
+      - ca-certificates
+      - gnupg
+      - fuse
+    state: present
+    force_apt_get: yes
+
+# Install NVM and Node.js versions
+- name: Download NVM installer script
+  get_url:
+    url: https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh
+    dest: /tmp/install-nvm.sh
+    mode: '0755'
+
+- name: Run NVM installer script
+  shell: bash /tmp/install-nvm.sh
+  args:
+    executable: /bin/bash
+
+- name: Add NVM paths to .zshrc
+  lineinfile:
+    path: "/home/mdils/.zshrc"
+    line: |
+      export NVM_DIR="$HOME/.nvm"
+      [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+      [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+    state: present
+
+- name: Install Node.js v16.20.2
+  shell: |
+    source "$HOME/.nvm/nvm.sh"
+    nvm install 16.20.2
+  args:
+    executable: /bin/bash
+  environment:
+    HOME: "{{ ansible_user_home }}"
+
+- name: Install Node.js v18.20.4
+  shell: |
+    source "$HOME/.nvm/nvm.sh"
+    nvm install 18.20.4
+  args:
+    executable: /bin/bash
+  environment:
+    HOME: "{{ ansible_user_home }}"
+
+- name: Install Node.js v20.11.1 and set as default
+  shell: |
+    source "$HOME/.nvm/nvm.sh"
+    nvm install 20.11.1
+    nvm alias default 20.11.1
+  args:
+    executable: /bin/bash
+  environment:
+    HOME: "{{ ansible_user_home }}"
+
+# Install Neovim AppImage and dependencies
+- name: Create Neovim AppImage directory
+  file:
+    path: "{{ ansible_user_home }}/.local/bin"
+    state: directory
+    mode: '0755'
+
+- name: Download Neovim AppImage
+  get_url:
+    url: https://github.com/neovim/neovim/releases/download/stable/nvim.appimage
+    dest: "{{ ansible_user_home }}/.local/bin/nvim"
+    mode: '0755'
+
+- name: Install Neovim dependencies
+  apt:
+    name:
+      - python3-neovim
+    state: present
+    force_apt_get: yes
+
+# Setup Neovim configuration
+- name: Create Neovim config directory
+  file:
+    path: "{{ ansible_user_home }}/.config/nvim"
+    state: directory
+    mode: '0755'
+
+- name: Clone Neovim configuration
+  git:
+    repo: git@github.com:mdilshan/my-vim-config.git
+    dest: "{{ ansible_user_home }}/.config/nvim"
+    version: master
+    force: yes
+
+- name: Create Packer directory
+  file:
+    path: "{{ ansible_user_home }}/.local/share/nvim/site/pack/packer/start/packer.nvim"
+    state: directory
+    mode: '0755'
+
+- name: Clone Packer
+  git:
+    repo: https://github.com/wbthomason/packer.nvim
+    dest: "{{ ansible_user_home }}/.local/share/nvim/site/pack/packer/start/packer.nvim"
+    version: master
+    force: yes
+
+- name: Install Neovim plugins
+  shell: nvim --headless -c 'autocmd User PackerComplete quitall' -c 'PackerSync'
+  args:
+    executable: /bin/bash
+  environment:
+    HOME: "{{ ansible_user_home }}"
+
+# Install Docker
+- name: Add Docker GPG key
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+- name: Add Docker repository
+  apt_repository:
+    repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu jammy stable
+    state: present
+    update_cache: yes
+
+- name: Install Docker
+  apt:
+    name: docker-ce
+    state: present
+    update_cache: yes
+    force_apt_get: yes
+
+- name: Ensure Docker service is started and enabled
+  systemd:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: Add user to docker group
+  user:
+    name: "{{ ansible_user }}"
+    groups: docker
+    append: yes
+
+# Add Go paths to .zshrc
+- name: Ensure Go environment is configured in .zshrc
+  lineinfile:
+    path: "/home/mdils/.zshrc"
+    line: |
+      export GOPATH="$HOME/go"
+      export PATH="$PATH:/usr/local/go/bin:$GOPATH/bin"
+    state: present
+
+# Install ngrok
+- name: Download ngrok
+  get_url:
+    url: https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz
+    dest: /tmp/ngrok.tgz
+    mode: '0644'
+
+- name: Extract ngrok
+  unarchive:
+    src: /tmp/ngrok.tgz
+    dest: /usr/local/bin
+    remote_src: yes
+    mode: '0755'
