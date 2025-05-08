@@ -86,19 +86,34 @@
   become_user: "{{ ansible_user_id }}"
 
 # Install Neovim AppImage and dependencies
-- name: Create Neovim AppImage directory
+- name: Create Neovim directories
   file:
-    path: "/home/{{ ansible_user_id }}/.local/bin"
+    path: "{{ item }}"
     state: directory
     mode: '0755'
-  become_user: "{{ ansible_user_id }}"
+  with_items:
+    - /opt/nvim
+    - "/home/{{ ansible_user_id }}/.config/nvim"
 
 - name: Download Neovim AppImage
   get_url:
-    url: https://github.com/neovim/neovim/releases/download/stable/nvim.appimage
-    dest: "/home/{{ ansible_user_id }}/.local/bin/nvim"
+    url: https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.appimage
+    dest: /tmp/nvim-linux-x86_64.appimage
     mode: '0755'
-  become_user: "{{ ansible_user_id }}"
+
+- name: Extract Neovim AppImage
+  shell: |
+    cd /tmp
+    ./nvim-linux-x86_64.appimage --appimage-extract
+  args:
+    executable: /bin/bash
+
+- name: Move Neovim files to system locations
+  shell: |
+    mv /tmp/squashfs-root /squashfs-root
+    ln -sf /squashfs-root/AppRun /usr/bin/nvim
+  args:
+    executable: /bin/bash
 
 - name: Install Neovim dependencies
   apt:
@@ -108,13 +123,6 @@
     force_apt_get: yes
 
 # Setup Neovim configuration
-- name: Create Neovim config directory
-  file:
-    path: "/home/{{ ansible_user_id }}/.config/nvim"
-    state: directory
-    mode: '0755'
-  become_user: "{{ ansible_user_id }}"
-
 - name: Clone Neovim configuration
   git:
     repo: git@github.com:mdilshan/my-vim-config.git
