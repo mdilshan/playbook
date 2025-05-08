@@ -59,6 +59,7 @@
   shell: bash /tmp/install-nvm.sh
   args:
     executable: /bin/bash
+  become_user: "{{ ansible_user_id }}"
 
 - name: Add NVM paths to .zshrc
   lineinfile:
@@ -68,6 +69,7 @@
       [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
       [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
     state: present
+  become_user: "{{ ansible_user_id }}"
 
 - name: Install Node.js versions
   shell: |
@@ -81,6 +83,7 @@
     executable: /bin/bash
   environment:
     HOME: "/home/{{ ansible_user_id }}"
+  become_user: "{{ ansible_user_id }}"
 
 # Install Neovim AppImage and dependencies
 - name: Create Neovim AppImage directory
@@ -88,12 +91,14 @@
     path: "/home/{{ ansible_user_id }}/.local/bin"
     state: directory
     mode: '0755'
+  become_user: "{{ ansible_user_id }}"
 
 - name: Download Neovim AppImage
   get_url:
     url: https://github.com/neovim/neovim/releases/download/stable/nvim.appimage
     dest: "/home/{{ ansible_user_id }}/.local/bin/nvim"
     mode: '0755'
+  become_user: "{{ ansible_user_id }}"
 
 - name: Install Neovim dependencies
   apt:
@@ -108,6 +113,7 @@
     path: "/home/{{ ansible_user_id }}/.config/nvim"
     state: directory
     mode: '0755'
+  become_user: "{{ ansible_user_id }}"
 
 - name: Clone Neovim configuration
   git:
@@ -115,12 +121,14 @@
     dest: "/home/{{ ansible_user_id }}/.config/nvim"
     version: master
     force: yes
+  become_user: "{{ ansible_user_id }}"
 
 - name: Create Packer directory
   file:
     path: "/home/{{ ansible_user_id }}/.local/share/nvim/site/pack/packer/start/packer.nvim"
     state: directory
     mode: '0755'
+  become_user: "{{ ansible_user_id }}"
 
 - name: Clone Packer
   git:
@@ -128,6 +136,7 @@
     dest: "/home/{{ ansible_user_id }}/.local/share/nvim/site/pack/packer/start/packer.nvim"
     version: master
     force: yes
+  become_user: "{{ ansible_user_id }}"
 
 - name: Install Neovim plugins
   shell: nvim --headless -c 'autocmd User PackerComplete quitall' -c 'PackerSync'
@@ -135,6 +144,7 @@
     executable: /bin/bash
   environment:
     HOME: "/home/{{ ansible_user_id }}"
+  become_user: "{{ ansible_user_id }}"
 
 # Install Docker
 - name: Add Docker GPG key
@@ -175,6 +185,7 @@
       export GOPATH="$HOME/go"
       export PATH="$PATH:/usr/local/go/bin:$GOPATH/bin"
     state: present
+  become_user: "{{ ansible_user_id }}"
 
 # Install ngrok
 - name: Download ngrok
