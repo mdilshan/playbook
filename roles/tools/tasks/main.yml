@@ -122,23 +122,12 @@
     state: present
     force_apt_get: yes
 
-# Setup Neovim configuration
-- name: Create Neovim config directory
-  file:
-    path: "/home/{{ ansible_user_id }}/.config/nvim"
-    state: directory
-    mode: '0755'
-    owner: "{{ ansible_user_id }}"
-    group: "{{ ansible_user_id }}"
-  become_user: "{{ ansible_user_id }}"
-
 - name: Clone Neovim configuration
   git:
     repo: git@github.com:mdilshan/my-vim-config.git
     dest: "/home/{{ ansible_user_id }}/.config/nvim"
     version: master
     force: yes
-  become_user: "{{ ansible_user_id }}"
 
 - name: Create Packer directory
   file:
