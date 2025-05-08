@@ -62,52 +62,37 @@
 
 - name: Add NVM paths to .zshrc
   lineinfile:
-    path: "/home/mdils/.zshrc"
+    path: "/home/{{ ansible_user }}/.zshrc"
     line: |
       export NVM_DIR="$HOME/.nvm"
       [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
       [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
     state: present
 
-- name: Install Node.js v16.20.2
+- name: Install Node.js versions
   shell: |
-    source "$HOME/.nvm/nvm.sh"
+    export NVM_DIR="/home/{{ ansible_user }}/.nvm"
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
     nvm install 16.20.2
-  args:
-    executable: /bin/bash
-  environment:
-    HOME: "/home/mdils"
-
-- name: Install Node.js v18.20.4
-  shell: |
-    source "$HOME/.nvm/nvm.sh"
     nvm install 18.20.4
-  args:
-    executable: /bin/bash
-  environment:
-    HOME: "/home/mdils"
-
-- name: Install Node.js v20.11.1 and set as default
-  shell: |
-    source "$HOME/.nvm/nvm.sh"
     nvm install 20.11.1
     nvm alias default 20.11.1
   args:
     executable: /bin/bash
   environment:
-    HOME: "/home/mdils"
+    HOME: "/home/{{ ansible_user }}"
 
 # Install Neovim AppImage and dependencies
 - name: Create Neovim AppImage directory
   file:
-    path: "/home/mdils/.local/bin"
+    path: "/home/{{ ansible_user }}/.local/bin"
     state: directory
     mode: '0755'
 
 - name: Download Neovim AppImage
   get_url:
     url: https://github.com/neovim/neovim/releases/download/stable/nvim.appimage
-    dest: "/home/mdils/.local/bin/nvim"
+    dest: "/home/{{ ansible_user }}/.local/bin/nvim"
     mode: '0755'
 
 - name: Install Neovim dependencies
@@ -120,27 +105,27 @@
 # Setup Neovim configuration
 - name: Create Neovim config directory
   file:
-    path: "/home/mdils/.config/nvim"
+    path: "/home/{{ ansible_user }}/.config/nvim"
     state: directory
     mode: '0755'
 
 - name: Clone Neovim configuration
   git:
     repo: git@github.com:mdilshan/my-vim-config.git
-    dest: "{{ ansible_user_home }}/.config/nvim"
+    dest: "/home/{{ ansible_user }}/.config/nvim"
     version: master
     force: yes
 
 - name: Create Packer directory
   file:
-    path: "{{ ansible_user_home }}/.local/share/nvim/site/pack/packer/start/packer.nvim"
+    path: "/home/{{ ansible_user }}/.local/share/nvim/site/pack/packer/start/packer.nvim"
     state: directory
     mode: '0755'
 
 - name: Clone Packer
   git:
     repo: https://github.com/wbthomason/packer.nvim
-    dest: "{{ ansible_user_home }}/.local/share/nvim/site/pack/packer/start/packer.nvim"
+    dest: "/home/{{ ansible_user }}/.local/share/nvim/site/pack/packer/start/packer.nvim"
     version: master
     force: yes
 
@@ -149,7 +134,7 @@
   args:
     executable: /bin/bash
   environment:
-    HOME: "{{ ansible_user_home }}"
+    HOME: "/home/{{ ansible_user }}"
 
 # Install Docker
 - name: Add Docker GPG key
@@ -185,7 +170,7 @@
 # Add Go paths to .zshrc
 - name: Ensure Go environment is configured in .zshrc
   lineinfile:
-    path: "/home/mdils/.zshrc"
+    path: "/home/{{ ansible_user }}/.zshrc"
     line: |
       export GOPATH="$HOME/go"
       export PATH="$PATH:/usr/local/go/bin:$GOPATH/bin"
