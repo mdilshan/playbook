@@ -146,14 +146,6 @@
     force: yes
   become_user: "{{ ansible_user_id }}"
 
-- name: Install Neovim plugins
-  shell: nvim --headless -c 'autocmd User PackerComplete quitall' -c 'PackerSync'
-  args:
-    executable: /bin/bash
-  environment:
-    HOME: "/home/{{ ansible_user_id }}"
-  become_user: "{{ ansible_user_id }}"
-
 # Install Docker
 - name: Add Docker GPG key
   apt_key:
