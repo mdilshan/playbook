@@ -2,6 +2,8 @@
 - hosts: localhost
   gather_facts: yes
   become: yes
+  vars:
+    ansible_user_id: mdils
   roles:
     - zsh
     - tools
