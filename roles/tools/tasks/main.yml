@@ -29,30 +29,22 @@
       - default-jdk
       - php-dev
       - php-pear
-      - php8.3-bcmath
       - composer
     state: present
     force_apt_get: yes
-
+      
 # Install system utilities
 - name: Install system utilities
   apt:
     name:
-      - curl
-      - wget
-      - unzip
       - htop
       - tmux
       - ripgrep
-      - jq
       - xclip
-      - ffmpeg
-      - postgresql-client
-      - software-properties-common
-      - apt-transport-https
-      - ca-certificates
-      - gnupg
-      - fuse
+        #    - ffmpeg
+        # - postgresql-client
+        # - software-properties-common
+        # - fuse
     state: present
     force_apt_get: yes
 
@@ -84,7 +76,7 @@
   args:
     executable: /bin/bash
   environment:
-    HOME: "{{ ansible_user_home }}"
+    HOME: "/home/mdils"
 
 - name: Install Node.js v18.20.4
   shell: |
@@ -93,7 +85,7 @@
   args:
     executable: /bin/bash
   environment:
-    HOME: "{{ ansible_user_home }}"
+    HOME: "/home/mdils"
 
 - name: Install Node.js v20.11.1 and set as default
   shell: |
@@ -103,19 +95,19 @@
   args:
     executable: /bin/bash
   environment:
-    HOME: "{{ ansible_user_home }}"
+    HOME: "/home/mdils"
 
 # Install Neovim AppImage and dependencies
 - name: Create Neovim AppImage directory
   file:
-    path: "{{ ansible_user_home }}/.local/bin"
+    path: "/home/mdils/.local/bin"
     state: directory
     mode: '0755'
 
 - name: Download Neovim AppImage
   get_url:
     url: https://github.com/neovim/neovim/releases/download/stable/nvim.appimage
-    dest: "{{ ansible_user_home }}/.local/bin/nvim"
+    dest: "/home/mdils/.local/bin/nvim"
     mode: '0755'
 
 - name: Install Neovim dependencies
@@ -128,7 +120,7 @@
 # Setup Neovim configuration
 - name: Create Neovim config directory
   file:
-    path: "{{ ansible_user_home }}/.config/nvim"
+    path: "/home/mdils/.config/nvim"
     state: directory
     mode: '0755'
 
