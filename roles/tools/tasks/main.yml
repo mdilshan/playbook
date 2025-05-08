@@ -124,7 +124,7 @@
 
 - name: Clone Neovim configuration
   git:
-    repo: git@github.com:mdilshan/my-vim-config.git
+    repo: https://github.com/mdilshan/my-vim-config.git
     dest: "/home/{{ ansible_user_id }}/.config/nvim"
     version: master
     force: yes
